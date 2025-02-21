@@ -29,7 +29,7 @@ U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
 void displayArrayElement(int index);
 void goToDeepSleep();
 void handleWakeup();
-void wrapText(U8G2_FOR_ADAFRUIT_GFX &u8g2Fonts, const String &text, int16_t x, int16_t y, int16_t maxWidth, int16_t lineHeight);
+int16_t wrapText(U8G2_FOR_ADAFRUIT_GFX &u8g2Fonts, const String &text, int16_t x, int16_t y, int16_t maxWidth, int16_t lineHeight);
 void renderCenteredText(U8G2_FOR_ADAFRUIT_GFX &u8g2Fonts, const String &text, int16_t y);
 int getRandomIndex();
 
@@ -75,7 +75,7 @@ void loop()
     // Empty. We use deep sleep to wake up and handle things in the setup.
 }
 
-void wrapText(U8G2_FOR_ADAFRUIT_GFX &u8g2Fonts, const String &text, int16_t x, int16_t y, int16_t maxWidth, int16_t lineHeight)
+int16_t wrapText(U8G2_FOR_ADAFRUIT_GFX &u8g2Fonts, const String &text, int16_t x, int16_t y, int16_t maxWidth, int16_t lineHeight)
 {
     String line = "";
     String word = "";
@@ -123,7 +123,9 @@ void wrapText(U8G2_FOR_ADAFRUIT_GFX &u8g2Fonts, const String &text, int16_t x, i
     {
         u8g2Fonts.setCursor(x, y);
         u8g2Fonts.println(line);
+        y += lineHeight;
     }
+    return y;
 }
 
 void renderCenteredText(U8G2_FOR_ADAFRUIT_GFX &u8g2Fonts, const String &text, int16_t y)
@@ -145,10 +147,10 @@ void displayArrayElement(int index)
     renderCenteredText(u8g2Fonts, data[index][0], 16);
 
     u8g2Fonts.setFont(u8g2_font_8x13_tf); // select u8g2 font from here: https://github.com/olikraus/u8g2/wiki/fntlistall
-    wrapText(u8g2Fonts, data[index][1], 5, 30, display.width() - 10, lineHeight);
+    int16_t y = wrapText(u8g2Fonts, data[index][1], 5, 32, display.width() - 6, lineHeight);
 
     u8g2Fonts.setFont(u8g2_font_8x13O_mf); // select u8g2 font from here: https://github.com/olikraus/u8g2/wiki/fntlistall
-    wrapText(u8g2Fonts, data[index][2], 5, 80, display.width() - 10, lineHeight);
+    wrapText(u8g2Fonts, data[index][2], 5, y + (lineHeight / 2), display.width() - 6, lineHeight);
 
     display.display();
 }
