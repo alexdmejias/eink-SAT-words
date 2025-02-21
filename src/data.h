@@ -1,7 +1,7 @@
 #ifndef DATA_H
 #define DATA_H
 
-const int numArrays = 3;
+const int numArrays = 1047;
 const int elementsPerArray = 3;
 const char *data[numArrays][elementsPerArray] = {
     {"abase", "(v.) to humiliate, degrade", "After being overthrown and abased, the deposedleader offered to bow down to his conqueror."},
@@ -1050,7 +1050,6 @@ const char *data[numArrays][elementsPerArray] = {
     {"yoke", "(v.) to join, link", "We yoked together the logs by tying a string around them."},
     {"zealous", "(adj.) fervent, filled with eagerness in pursuit of something", "If he were any more zealous about getting his promotion, he'd practically live at the office."},
     {"zenith", "(n.) the highest point, culminating point", "I was too nice to tell Nelly that she had reached the absolute zenith of her career with that one hit of hers."},
-    {"zephyr", "(n.) a gentle breeze", "If not for the zephyrs that were blowing and cooling us, our room would've been unbearably hot."},
-};
+    {"zephyr", "(n.) a gentle breeze", "If not for the zephyrs that were blowing and cooling us, our room would've been unbearably hot."}};
 
 #endif // DATA_H
