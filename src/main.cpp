@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include "data.h" // Include the data file
+#include "driver/rtc_io.h"
 
 #include <GxEPD2_BW.h>
 #include <GxEPD2_3C.h>
@@ -22,12 +23,19 @@
 #define SCREEN_RST 16
 #define SCREEN_BUSY 4
 
-#define BUTTON_PIN 33 // GPIO0, adjust as needed
+#define WAKEUP_GPIO GPIO_NUM_33
+
+/*
+
+button needs to be connected to GPIO 33 and 3v3
+
+*/
 
 U8G2_FOR_ADAFRUIT_GFX u8g2Fonts;
 
 void displayArrayElement(int index);
 void goToDeepSleep();
+void printWakeUpReason();
 void handleWakeup();
 int16_t wrapText(U8G2_FOR_ADAFRUIT_GFX &u8g2Fonts, const String &text, int16_t x, int16_t y, int16_t maxWidth, int16_t lineHeight);
 void renderCenteredText(U8G2_FOR_ADAFRUIT_GFX &u8g2Fonts, const String &text, int16_t y);
@@ -45,7 +53,7 @@ void setup()
     display.setRotation(1);
 
     // Initialize the button pin
-    pinMode(BUTTON_PIN, INPUT_PULLUP);
+    // pinMode(BUTTON_PIN, INPUT_PULLUP);
     esp_sleep_enable_ext0_wakeup(GPIO_NUM_33, 0); // 0 = Low, adjust as needed
 
     // Seed the random number generator with a random value from esp_random()
@@ -54,7 +62,7 @@ void setup()
     currentIndex = getRandomIndex();
 
     // Handle wakeup
-    handleWakeup();
+    printWakeUpReason();
 
     uint16_t bg = GxEPD_WHITE;
     uint16_t fg = GxEPD_BLACK;
@@ -157,28 +165,50 @@ void displayArrayElement(int index)
 
 void goToDeepSleep()
 {
+
+    esp_sleep_enable_ext0_wakeup(WAKEUP_GPIO, 1); // 1 = High, 0 = Low
+    // Configure pullup/downs via RTCIO to tie wakeup pins to inactive level during deepsleep.
+    // EXT0 resides in the same power domain (RTC_PERIPH) as the RTC IO pullup/downs.
+    // No need to keep that power domain explicitly, unlike EXT1.
+    rtc_gpio_pullup_dis(WAKEUP_GPIO);
+    rtc_gpio_pulldown_en(WAKEUP_GPIO);
+
     // Calculate time until next day (24 hours from now)
     uint64_t timeUntilNextDay = 24 * 60 * 60 * 1000000ULL; // 24 hours in microseconds
     esp_sleep_enable_timer_wakeup(timeUntilNextDay);
     esp_deep_sleep_start();
 }
 
+void printWakeUpReason()
+{
+    esp_sleep_wakeup_cause_t wakeup_reason;
+
+    wakeup_reason = esp_sleep_get_wakeup_cause();
+
+    switch (wakeup_reason)
+    {
+    case ESP_SLEEP_WAKEUP_EXT0:
+        Serial.println("Wakeup caused by external signal using RTC_IO");
+        break;
+    case ESP_SLEEP_WAKEUP_EXT1:
+        Serial.println("Wakeup caused by external signal using RTC_CNTL");
+        break;
+    case ESP_SLEEP_WAKEUP_TIMER:
+        Serial.println("Wakeup caused by timer");
+        break;
+    case ESP_SLEEP_WAKEUP_TOUCHPAD:
+        Serial.println("Wakeup caused by touchpad");
+        break;
+    case ESP_SLEEP_WAKEUP_ULP:
+        Serial.println("Wakeup caused by ULP program");
+        break;
+    default:
+        Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason);
+        break;
+    }
+}
+
 int getRandomIndex()
 {
     return rand() % numArrays;
-}
-
-// Wake up from deep sleep
-void handleWakeup()
-{
-    if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_EXT0)
-    {
-        // Button press wake up
-        currentIndex = getRandomIndex();
-    }
-    else if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER)
-    {
-        // Timer wake up (end of day)
-        currentIndex = getRandomIndex();
-    }
 }
