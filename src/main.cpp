@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
+#include "esp_bt.h"
 // #include <Wire.h>
 // #include <esp_deep_sleep.h>
 #include <stdlib.h>
