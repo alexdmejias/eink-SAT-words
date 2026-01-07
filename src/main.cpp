@@ -1,6 +1,7 @@
 #define ENABLE_GxEPD2_GFX 0
 
 #include <Arduino.h>
+#include <WiFi.h>
 // #include <Wire.h>
 // #include <esp_deep_sleep.h>
 #include <stdlib.h>
@@ -47,6 +48,10 @@ RTC_DATA_ATTR int currentIndex = 0;
 
 void setup()
 {
+    // Disable WiFi and Bluetooth to save power
+    WiFi.mode(WIFI_OFF);
+    btStop();
+    
     // Initialize the display
     display.init();
     u8g2Fonts.begin(display);
@@ -60,9 +65,6 @@ void setup()
     srand(esp_random());
 
     currentIndex = getRandomIndex();
-
-    // Handle wakeup
-    printWakeUpReason();
 
     uint16_t bg = GxEPD_WHITE;
     uint16_t fg = GxEPD_BLACK;
@@ -161,10 +163,14 @@ void displayArrayElement(int index)
     wrapText(u8g2Fonts, data[index][2], 5, y + (lineHeight / 2), display.width() - 6, lineHeight);
 
     display.display();
+    display.hibernate();  // Put display into low-power mode
 }
 
 void goToDeepSleep()
 {
+    // Disable WiFi and Bluetooth to save power
+    WiFi.mode(WIFI_OFF);
+    btStop();
 
     esp_sleep_enable_ext0_wakeup(WAKEUP_GPIO, 1); // 1 = High, 0 = Low
     // Configure pullup/downs via RTCIO to tie wakeup pins to inactive level during deepsleep.
@@ -181,31 +187,32 @@ void goToDeepSleep()
 
 void printWakeUpReason()
 {
-    esp_sleep_wakeup_cause_t wakeup_reason;
+    // Disabled to save power - Serial communication uses power unnecessarily
+    // esp_sleep_wakeup_cause_t wakeup_reason;
 
-    wakeup_reason = esp_sleep_get_wakeup_cause();
+    // wakeup_reason = esp_sleep_get_wakeup_cause();
 
-    switch (wakeup_reason)
-    {
-    case ESP_SLEEP_WAKEUP_EXT0:
-        Serial.println("Wakeup caused by external signal using RTC_IO");
-        break;
-    case ESP_SLEEP_WAKEUP_EXT1:
-        Serial.println("Wakeup caused by external signal using RTC_CNTL");
-        break;
-    case ESP_SLEEP_WAKEUP_TIMER:
-        Serial.println("Wakeup caused by timer");
-        break;
-    case ESP_SLEEP_WAKEUP_TOUCHPAD:
-        Serial.println("Wakeup caused by touchpad");
-        break;
-    case ESP_SLEEP_WAKEUP_ULP:
-        Serial.println("Wakeup caused by ULP program");
-        break;
-    default:
-        Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason);
-        break;
-    }
+    // switch (wakeup_reason)
+    // {
+    // case ESP_SLEEP_WAKEUP_EXT0:
+    //     Serial.println("Wakeup caused by external signal using RTC_IO");
+    //     break;
+    // case ESP_SLEEP_WAKEUP_EXT1:
+    //     Serial.println("Wakeup caused by external signal using RTC_CNTL");
+    //     break;
+    // case ESP_SLEEP_WAKEUP_TIMER:
+    //     Serial.println("Wakeup caused by timer");
+    //     break;
+    // case ESP_SLEEP_WAKEUP_TOUCHPAD:
+    //     Serial.println("Wakeup caused by touchpad");
+    //     break;
+    // case ESP_SLEEP_WAKEUP_ULP:
+    //     Serial.println("Wakeup caused by ULP program");
+    //     break;
+    // default:
+    //     Serial.printf("Wakeup was not caused by deep sleep: %d\n", wakeup_reason);
+    //     break;
+    // }
 }
 
 int getRandomIndex()
