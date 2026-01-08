@@ -49,9 +49,13 @@ RTC_DATA_ATTR int currentIndex = 0;
 
 void setup()
 {
+    // Reduce CPU frequency to save power
+    setCpuFrequencyMhz(80);
+    
     // Disable WiFi and Bluetooth to save power
     WiFi.mode(WIFI_OFF);
     btStop();
+    esp_bt_controller_disable();
     
     // Initialize the display
     display.init();
@@ -180,7 +184,7 @@ void goToDeepSleep()
     rtc_gpio_pullup_dis(WAKEUP_GPIO);
     rtc_gpio_pulldown_en(WAKEUP_GPIO);
 
-    // Calculate time until next day (24 hours from now)
+    // Wake up every 24 hours to refresh the display
     uint64_t timeUntilNextDay = 24 * 60 * 60 * 1000000ULL; // 24 hours in microseconds
     esp_sleep_enable_timer_wakeup(timeUntilNextDay);
     esp_deep_sleep_start();
