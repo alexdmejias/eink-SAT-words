@@ -26,6 +26,7 @@
 #define SCREEN_BUSY 4
 
 #define WAKEUP_GPIO GPIO_NUM_33
+#define CPU_FREQ_MHZ 80  // Reduced CPU frequency for power saving (default is 240 MHz)
 
 /*
 
@@ -60,7 +61,7 @@ RTC_DATA_ATTR int currentIndex = 0;
 void setup()
 {
     // Reduce CPU frequency to save power
-    setCpuFrequencyMhz(80);
+    setCpuFrequencyMhz(CPU_FREQ_MHZ);
     
     // Disable WiFi and Bluetooth to save power
     WiFi.mode(WIFI_OFF);
