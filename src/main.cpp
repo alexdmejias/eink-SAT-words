@@ -27,6 +27,8 @@
 
 #define WAKEUP_GPIO GPIO_NUM_33
 #define CPU_FREQ_MHZ 80  // Reduced CPU frequency for power saving (default is 240 MHz)
+                         // 80 MHz is sufficient for display updates and provides ~60% power reduction
+                         // Performance note: This affects processing speed but is adequate for e-ink refresh rates
 
 /*
 
@@ -38,7 +40,8 @@ Power Optimization Features Implemented:
 5. Display Hibernation: display.hibernate() puts e-ink display into low-power mode after update
 6. GPIO Interrupt Wakeup: Uses ext0 wakeup on GPIO 33 for button-based wake without polling
 
-Note: Partial refresh is not supported on GxEPD2_290c (3-color display) and would require full refresh anyway.
+Note: Partial refresh is not supported on 3-color e-ink displays (including GxEPD2_290c).
+3-color displays require full refresh to properly update all color layers and avoid ghosting artifacts.
 
 button needs to be connected to GPIO 33 and 3v3
 
