@@ -29,6 +29,16 @@
 
 /*
 
+Power Optimization Features Implemented:
+1. Deep Sleep Mode: ESP32 enters deep sleep between display updates, waking every 24 hours or on GPIO interrupt
+2. CPU Frequency Reduction: CPU clock reduced from 240 MHz to 80 MHz to save power
+3. Wi-Fi Disabled: WiFi.mode(WIFI_OFF) disables Wi-Fi radio completely
+4. Bluetooth Disabled: btStop() and esp_bt_controller_disable() for aggressive Bluetooth power-down
+5. Display Hibernation: display.hibernate() puts e-ink display into low-power mode after update
+6. GPIO Interrupt Wakeup: Uses ext0 wakeup on GPIO 33 for button-based wake without polling
+
+Note: Partial refresh is not supported on GxEPD2_290c (3-color display) and would require full refresh anyway.
+
 button needs to be connected to GPIO 33 and 3v3
 
 */
